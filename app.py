@@ -327,7 +327,13 @@ def get_climate_data(district, year, historical_df):
 # STREAMLIT APP
 # ============================================================================
 
+st.set_page_config(...)
 
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# ========== ADD THESE 2 LINES HERE ==========
+st.image(os.path.join(current_dir, 'app.png'), use_container_width=True)
+st.divider()
 st.title("🌾 Malawi Crop Yield Predictor")
 st.markdown("### AI-Powered Forecasting with ARIMAX-SVR Hybrid Model")
 st.markdown("---")
