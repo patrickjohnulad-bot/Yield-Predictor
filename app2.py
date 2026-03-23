@@ -378,4 +378,4 @@ st.markdown("---")
 st.markdown("""
 *Powered by ARIMAX-SVR Hybrid Model | Data: HarvestStat Africa | Climate: NASA POWER API*
 """)
-st.markdown("Created by Patrick John | Thesis Project")
+st.markdown("Created by Patrick John")
