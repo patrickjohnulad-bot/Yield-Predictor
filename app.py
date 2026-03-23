@@ -372,8 +372,6 @@ if model is None:
 perf = model.get_performance()
 info = crop_info[selected_crop]
 
-# Display model info
-st.markdown("---")
 
 
 # ============================================================================
@@ -391,13 +389,13 @@ if climate_data:
     
     col1, col2 = st.columns(2)
     with col1:
-        rainfall = st.number_input("🌧️ Rainfall (mm/day):", value=float(climate_data['rainfall']), step=0.1)
-        humidity = st.number_input("💧 Humidity (%):", value=float(climate_data['humidity']), step=1.0)
+        rainfall = st.number_input("Rainfall (mm/day):", value=float(climate_data['rainfall']), step=0.1)
+        humidity = st.number_input("Humidity (%):", value=float(climate_data['humidity']), step=1.0)
     with col2:
-        tmax = st.number_input("🌡️ Max Temperature (°C):", value=float(climate_data['tmax']), step=0.5)
-        wind = st.number_input("💨 Wind Speed (m/s):", value=float(climate_data['wind']), step=0.1)
+        tmax = st.number_input(" Max Temperature (°C):", value=float(climate_data['tmax']), step=0.5)
+        wind = st.number_input("Wind Speed (m/s):", value=float(climate_data['wind']), step=0.1)
     
-    use_manual = st.checkbox("✏️ Edit climate values manually")
+    use_manual = st.checkbox("Edit climate values manually")
     if use_manual:
         st.info("Adjust values above to test different climate scenarios")
 
@@ -405,23 +403,23 @@ else:
     st.warning(message)
     col1, col2 = st.columns(2)
     with col1:
-        rainfall = st.number_input("🌧️ Rainfall (mm/day):", min_value=0.0, max_value=20.0, value=3.5, step=0.1)
-        humidity = st.number_input("💧 Humidity (%):", min_value=20.0, max_value=100.0, value=70.0, step=1.0)
+        rainfall = st.number_input("Rainfall (mm/day):", min_value=0.0, max_value=20.0, value=3.5, step=0.1)
+        humidity = st.number_input("Humidity (%):", min_value=20.0, max_value=100.0, value=70.0, step=1.0)
     with col2:
-        tmax = st.number_input("🌡️ Max Temperature (°C):", min_value=20.0, max_value=40.0, value=25.0, step=0.5)
-        wind = st.number_input("💨 Wind Speed (m/s):", min_value=0.0, max_value=10.0, value=2.5, step=0.1)
+        tmax = st.number_input("Max Temperature (°C):", min_value=20.0, max_value=40.0, value=25.0, step=0.5)
+        wind = st.number_input("Wind Speed (m/s):", min_value=0.0, max_value=10.0, value=2.5, step=0.1)
 
 # ============================================================================
 # PREDICT BUTTON
 # ============================================================================
 
-if st.button(f"🔮 Predict {info['icon']} {selected_crop} Yield", type="primary", use_container_width=True):
+if st.button(f"Predict {info['icon']} {selected_crop} Yield", type="primary", use_container_width=True):
     
     climate = {'rainfall': rainfall, 'tmax': tmax, 'humidity': humidity, 'wind': wind}
     prediction = model.predict(climate, year)
     
     st.markdown("---")
-    st.markdown("### 📊 Prediction Result")
+    st.markdown("Prediction Result")
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
@@ -443,18 +441,18 @@ if st.button(f"🔮 Predict {info['icon']} {selected_crop} Yield", type="primary
         error_percent = (error / actual) * 100
         
         st.markdown("---")
-        st.markdown("### 📈 Actual vs Predicted")
+        st.markdown("### Actual vs Predicted")
         
         col1, col2 = st.columns(2)
         with col1:
-            st.metric("📊 Actual Yield", f"{actual:.0f} kg/ha")
+            st.metric("Actual Yield", f"{actual:.0f} kg/ha")
         with col2:
-            st.metric("🔮 Predicted Yield", f"{prediction} kg/ha", delta=f"{prediction - actual:.0f}")
+            st.metric("Predicted Yield", f"{prediction} kg/ha", delta=f"{prediction - actual:.0f}")
         
         if error_percent < 20:
-            st.success(f"✅ Excellent! Prediction is within {error_percent:.1f}% of actual yield")
+            st.success(f"Excellent! Prediction is within {error_percent:.1f}% of actual yield")
         elif error_percent < 50:
-            st.warning(f"⚠️ Prediction error: {error:.0f} kg/ha ({error_percent:.1f}%)")
+            st.warning(f"Prediction error: {error:.0f} kg/ha ({error_percent:.1f}%)")
         else:
             st.error(f"❌ High prediction error: {error:.0f} kg/ha ({error_percent:.1f}%)")
     
