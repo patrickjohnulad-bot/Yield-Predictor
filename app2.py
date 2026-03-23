@@ -211,7 +211,7 @@ def get_climate_data(district, year, historical_df):
     if year >= current_year - 1:
         nasa_data = get_nasa_power_climate(lat, lon, year)
         if nasa_data:
-            return nasa_data, "✅ Using live climate data from NASA POWER"
+            return nasa_data, "Using live climate data from NASA POWER"
     
     if historical_df is not None:
         historical = historical_df[(historical_df['district'] == district) & (historical_df['YEAR'] == year)]
