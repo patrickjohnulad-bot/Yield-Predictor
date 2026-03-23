@@ -8,15 +8,10 @@ import warnings
 warnings.filterwarnings('ignore')
 
 # ============================================================================
-# DEFINE THE ARIMAX-SVR MODEL CLASS (Matches project1.ipynb)
+# DEFINE THE ARIMAX-SVR MODEL (Matches project1.ipynb)
 # ============================================================================
 
 class ARIMAXSVRModel:
-    """
-    ARIMAX-SVR model that uses winning model logic
-    Same methodology for all crops from project1.ipynb
-    """
-    
     def __init__(self, crop_name, district, base_yield, rmse=None, mape=None):
         self.crop_name = crop_name
         self.district = district
@@ -24,41 +19,41 @@ class ARIMAXSVRModel:
         self.rmse = rmse
         self.mape = mape
         self.trend = 8  # kg/ha per year from 2015
-        
+    
     def predict(self, climate_data, year):
         """Predict yield using optimized ARIMAX-SVR logic"""
         prediction = self.base_yield
-        
+
         # Technology trend from 2015
         trend_years = max(0, year - 2015)
         prediction += self.trend * trend_years
-        
+
         # Climate effects (optimized from winning model)
         rainfall = climate_data.get('rainfall', 3.5)
         tmax = climate_data.get('tmax', 25.0)
         humidity = climate_data.get('humidity', 70.0)
         wind = climate_data.get('wind', 2.5)
-        
+
         # ARIMAX component: rainfall effect
         if rainfall < 2.0:
             prediction -= 150
         elif rainfall > 5.0:
             prediction -= 100
-        
+
         # ARIMAX component: temperature effect
         if tmax > 28:
             prediction -= 100
         elif tmax < 22:
             prediction -= 80
-        
+
         # SVR component: humidity correction
         if humidity < 55:
             prediction -= 80
-        
+
         # SVR component: wind correction
         if wind > 3.5:
             prediction -= 80
-        
+
         # Crop-specific bounds
         if self.crop_name == 'Rice':
             return max(400, min(3500, round(prediction)))
@@ -86,7 +81,7 @@ class ARIMAXSVRModel:
 
 @st.cache_resource
 def load_models():
-    """Load ARIMAX-SVR models for all crops (from project1.ipynb)"""
+    """Load ARIMAX-SVR models for all crops"""
     with open('/home/guest/Documents/MyThesis/climate/arimax_svr_all_crops.pkl', 'rb') as f:
         models = pickle.load(f)
     return models
@@ -108,7 +103,7 @@ def load_actual_yields():
         crop_data = df[(df['country'] == 'Malawi') & (df['product'] == crop)].copy()
         crop_data['yield_kg'] = (crop_data['production'] / crop_data['area']) * 1000
         
-        # Fix Thyolo 2023 outlier for all crops
+        # Fix Thyolo 2023 outlier
         crop_data.loc[(crop_data['admin_2'] == 'Thyolo') & (crop_data['harvest_year'] == 2023), 'yield_kg'] = 5570
         
         actual_dict[crop_display] = {}
@@ -125,14 +120,14 @@ def load_actual_yields():
 
 
 # ============================================================================
-# CROP INFO WITH ICONS AND R² VALUES
+# CROP INFO
 # ============================================================================
 
 crop_info = {
-    'Maize': {'icon': '🌽', 'r2': 0.5835, 'rmse': 519, 'color': '#FFD700'},
-    'Rice': {'icon': '🍚', 'r2': 0.4394, 'rmse': 568, 'color': '#F4A460'},
-    'Soybean': {'icon': '🫘', 'r2': 0.2761, 'rmse': 380, 'color': '#8B4513'},
-    'Groundnuts': {'icon': '🥜', 'r2': 0.2633, 'rmse': 367, 'color': '#CD853F'}
+    'Maize': {'icon': '🌽', 'r2': 0.5835, 'rmse': 519},
+    'Rice': {'icon': '🍚', 'r2': 0.4394, 'rmse': 568},
+    'Soybean': {'icon': '🫘', 'r2': 0.2761, 'rmse': 380},
+    'Groundnuts': {'icon': '🥜', 'r2': 0.2633, 'rmse': 367}
 }
 
 # ============================================================================
@@ -153,7 +148,7 @@ district_coords = {
 }
 
 # ============================================================================
-# STORED HISTORICAL CLIMATE DATA
+# HISTORICAL CLIMATE DATA
 # ============================================================================
 
 @st.cache_data
@@ -165,7 +160,7 @@ def load_historical_climate():
         return None
 
 # ============================================================================
-# NASA POWER API FUNCTION
+# NASA POWER API
 # ============================================================================
 
 def get_nasa_power_climate(lat, lon, year):
@@ -256,7 +251,7 @@ all_crops = list(models.keys())
 all_districts = sorted(list(models['Maize'].keys()))
 
 # ============================================================================
-# INPUT SECTION - Simple dropdowns like district selection
+# INPUT SECTION
 # ============================================================================
 
 st.markdown("### 📍 Select Crop and Location")
@@ -264,10 +259,9 @@ st.markdown("### 📍 Select Crop and Location")
 col1, col2 = st.columns(2)
 
 with col1:
-    # Crop selection dropdown with icons
     crop_options = [f"{crop_info[crop]['icon']} {crop}" for crop in all_crops]
     selected_crop_display = st.selectbox("Crop:", crop_options)
-    selected_crop = selected_crop_display.split(" ")[1]  # Extract crop name without icon
+    selected_crop = selected_crop_display.split(" ")[1]
 
 with col2:
     selected_district = st.selectbox("District:", all_districts)
@@ -275,7 +269,7 @@ with col2:
 st.markdown("### 📅 Select Year")
 year = st.number_input("Year:", min_value=2000, max_value=2030, value=2025, step=1)
 
-# Get model for selected crop and district
+# Get model
 model = models[selected_crop].get(selected_district)
 if model is None:
     st.error(f"No model available for {selected_crop} in {selected_district}")
@@ -306,7 +300,7 @@ with col_info4:
 st.markdown("---")
 st.markdown("### 🌦️ Climate Data")
 
-with st.spinner(f"Fetching climate data for {selected_district}, {year}..."):
+with st.spinner(f"Fetching climate data..."):
     climate_data, message = get_climate_data(selected_district, year, historical_climate)
 
 if climate_data:
@@ -314,11 +308,11 @@ if climate_data:
     
     col1, col2 = st.columns(2)
     with col1:
-        rainfall = st.number_input("🌧️ Rainfall (mm/day):", value=float(climate_data['rainfall']), step=0.1, help="Optimal: 3-4 mm/day")
-        humidity = st.number_input("💧 Humidity (%):", value=float(climate_data['humidity']), step=1.0, help="Optimal: >65%")
+        rainfall = st.number_input("🌧️ Rainfall (mm/day):", value=float(climate_data['rainfall']), step=0.1)
+        humidity = st.number_input("💧 Humidity (%):", value=float(climate_data['humidity']), step=1.0)
     with col2:
-        tmax = st.number_input("🌡️ Max Temperature (°C):", value=float(climate_data['tmax']), step=0.5, help="Optimal: 24-26°C")
-        wind = st.number_input("💨 Wind Speed (m/s):", value=float(climate_data['wind']), step=0.1, help="Optimal: <3 m/s")
+        tmax = st.number_input("🌡️ Max Temperature (°C):", value=float(climate_data['tmax']), step=0.5)
+        wind = st.number_input("💨 Wind Speed (m/s):", value=float(climate_data['wind']), step=0.1)
     
     use_manual = st.checkbox("✏️ Edit climate values manually")
     if use_manual:
@@ -326,15 +320,13 @@ if climate_data:
 
 else:
     st.warning(message)
-    st.markdown("### ✏️ Manual Climate Input")
-    
     col1, col2 = st.columns(2)
     with col1:
-        rainfall = st.number_input("🌧️ Rainfall (mm/day):", min_value=0.0, max_value=20.0, value=3.5, step=0.1)
-        humidity = st.number_input("💧 Humidity (%):", min_value=20.0, max_value=100.0, value=70.0, step=1.0)
+        rainfall = st.number_input("🌧️ Rainfall (mm/day):", value=3.5, step=0.1)
+        humidity = st.number_input("💧 Humidity (%):", value=70.0, step=1.0)
     with col2:
-        tmax = st.number_input("🌡️ Max Temperature (°C):", min_value=20.0, max_value=40.0, value=25.0, step=0.5)
-        wind = st.number_input("💨 Wind Speed (m/s):", min_value=0.0, max_value=10.0, value=2.5, step=0.1)
+        tmax = st.number_input("🌡️ Max Temperature (°C):", value=25.0, step=0.5)
+        wind = st.number_input("💨 Wind Speed (m/s):", value=2.5, step=0.1)
 
 # ============================================================================
 # PREDICT BUTTON
@@ -355,34 +347,22 @@ if st.button(f"🔮 Predict {info['icon']} {selected_crop} Yield", type="primary
             <div style="font-size: 48px;">{info['icon']}</div>
             <h2 style="margin: 10px 0 0 0;">{prediction}</h2>
             <h3>kg/ha</h3>
-            <p style="margin: 0;">Predicted {selected_crop} Yield for {selected_district} in {year}</p>
-            <p style="margin: 10px 0 0 0; font-size: 12px;">R² = {info['r2']:.4f} | RMSE = {info['rmse']} kg/ha</p>
+            <p>Predicted {selected_crop} Yield for {selected_district} in {year}</p>
+            <p style="font-size: 12px;">R² = {info['r2']:.4f} | RMSE = {info['rmse']} kg/ha</p>
         </div>
         """, unsafe_allow_html=True)
     
-    # Show actual if available
     actual = actual_dict.get(selected_crop, {}).get(selected_district, {}).get(year)
     
     if actual:
         error = abs(actual - prediction)
         error_percent = (error / actual) * 100
-        
         st.markdown("---")
-        st.markdown("### 📈 Actual vs Predicted")
-        
         col1, col2 = st.columns(2)
         with col1:
             st.metric("📊 Actual Yield", f"{actual:.0f} kg/ha")
         with col2:
             st.metric("🔮 Predicted Yield", f"{prediction} kg/ha", delta=f"{prediction - actual:.0f}")
-        
-        if error_percent < 20:
-            st.success(f"✅ Excellent! Prediction is within {error_percent:.1f}% of actual yield")
-        elif error_percent < 50:
-            st.warning(f"⚠️ Prediction error: {error:.0f} kg/ha ({error_percent:.1f}%)")
-        else:
-            st.error(f"❌ High prediction error: {error:.0f} kg/ha ({error_percent:.1f}%)")
-    
     else:
         st.info(f"📌 No actual yield data available for {selected_crop} in {selected_district} ({year})")
 
@@ -401,7 +381,6 @@ with col1:
     **🌾 Crop:** {info['icon']} {selected_crop}  
     **🤖 Model:** ARIMAX-SVR Hybrid  
     **📊 Base Yield:** {perf['base_yield']:.0f} kg/ha  
-    **📈 Technology Trend:** +{perf['trend']} kg/ha/year
     """)
 
 with col2:
@@ -410,10 +389,7 @@ with col2:
     **🎯 R²:** {info['r2']:.4f}  
     **📊 RMSE:** {info['rmse']} kg/ha  
     **📈 ARIMA Order:** (1, 0, 0)  
-    **🔬 SVR Kernel:** rbf
     """)
 
 st.markdown("---")
-st.markdown(f"""
-*Powered by ARIMAX-SVR Hybrid Model | Data: HarvestStat Africa (1983-2023) | Climate: NASA POWER API*
-""")
+st.markdown("*Powered by ARIMAX-SVR Hybrid Model | Data: HarvestStat Africa | Climate: NASA POWER API*")
