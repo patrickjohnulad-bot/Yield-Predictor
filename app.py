@@ -374,18 +374,7 @@ info = crop_info[selected_crop]
 
 # Display model info
 st.markdown("---")
-st.markdown("### 📊 Model Information")
 
-col_info1, col_info2, col_info3, col_info4 = st.columns(4)
-
-with col_info1:
-    st.metric("Base Yield", f"{perf['base_yield']:.0f} kg/ha")
-with col_info2:
-    st.metric("R² Score", f"{r2_values[selected_crop]:.4f}")
-with col_info3:
-    st.metric("RMSE", f"{rmse_values[selected_crop]} kg/ha")
-with col_info4:
-    st.metric("Trend", f"+{perf['trend']} kg/ha/year")
 
 # ============================================================================
 # CLIMATE DATA SECTION
