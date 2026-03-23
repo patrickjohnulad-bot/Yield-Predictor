@@ -242,7 +242,7 @@ with st.spinner("Loading models..."):
         df_full = load_harveststat_data()
         actual_dict = load_actual_yields()
         historical_climate = load_historical_climate()
-        st.success("✅ Models loaded successfully!")
+        st.success(" Welcome to Malawi Maize Yield Predictor!")
     except Exception as e:
         st.error(f"Error loading models: {str(e)}")
         st.stop()
@@ -254,7 +254,7 @@ all_districts = sorted(models.keys())
 # INPUT SECTION
 # ============================================================================
 
-st.markdown("### 📍 Select Location and Year")
+st.markdown("### Select Location and Year")
 
 col1, col2 = st.columns(2)
 
@@ -268,7 +268,7 @@ with col2:
 model = models[selected_district]
 perf = model.get_performance()
 
-st.caption(f"📍 {'Trained' if perf['rmse'] else 'Base'} Model | Base yield: {model.base_yield:.0f} kg/ha | RMSE: {perf['rmse'] or 'N/A'} kg/ha | MAPE: {perf['mape'] or 'N/A'}%")
+st.caption(f" {'Trained' if perf['rmse'] else 'Base'} Model | Base yield: {model.base_yield:.0f} kg/ha | RMSE: {perf['rmse'] or 'N/A'} kg/ha | MAPE: {perf['mape'] or 'N/A'}%")
 
 # Auto-fetch climate data
 st.markdown("---")
@@ -289,13 +289,13 @@ if climate_data:
         tmax = st.number_input("Temperature (°C):", value=float(climate_data['tmax']), step=0.5)
         wind = st.number_input("Wind Speed (m/s):", value=float(climate_data['wind']), step=0.1)
     
-    use_manual = st.checkbox("✏️ Edit climate values manually")
+    use_manual = st.checkbox("Edit climate values manually")
     if use_manual:
         st.info("Edit values above to test different climate scenarios")
 
 else:
     st.warning(message)
-    st.markdown("### ✏️ Manual Climate Input")
+    st.markdown("###  Manual Climate Input")
     
     col1, col2 = st.columns(2)
     with col1:
@@ -309,13 +309,13 @@ else:
 # PREDICT BUTTON
 # ============================================================================
 
-if st.button("🔮 Predict Yield", type="primary", use_container_width=True):
+if st.button(" Predict Yield", type="primary", use_container_width=True):
     
     climate = {'rainfall': rainfall, 'tmax': tmax, 'humidity': humidity, 'wind': wind}
     prediction = models[selected_district].predict(climate, year)
     
     st.markdown("---")
-    st.markdown("### 📊 Prediction Result")
+    st.markdown("### Prediction Result")
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
@@ -335,42 +335,42 @@ if st.button("🔮 Predict Yield", type="primary", use_container_width=True):
         error_percent = (error / actual) * 100
         
         st.markdown("---")
-        st.markdown("### 📈 Actual vs Predicted")
+        st.markdown("### Actual vs Predicted")
         
         col1, col2 = st.columns(2)
         with col1:
-            st.metric("📊 Actual Yield", f"{actual:.0f} kg/ha")
+            st.metric(" Actual Yield", f"{actual:.0f} kg/ha")
         with col2:
-            st.metric("🔮 Predicted Yield", f"{prediction} kg/ha", delta=f"{prediction - actual:.0f}")
+            st.metric(" Predicted Yield", f"{prediction} kg/ha", delta=f"{prediction - actual:.0f}")
         
-        st.info(f"📊 Prediction error: {error:.0f} kg/ha ({error_percent:.1f}%)")
+        st.info(f"Prediction error: {error:.0f} kg/ha ({error_percent:.1f}%)")
     
     else:
-        st.info(f"📌 No actual yield data available for {selected_district} in {year}")
+        st.info(f" No actual yield data available for {selected_district} in {year}")
 
 # ============================================================================
 # ABOUT SECTION
 # ============================================================================
 
 st.markdown("---")
-st.markdown("### 📝 About This Tool")
+st.markdown("###  About This Tool")
 
 col1, col2 = st.columns(2)
 
 with col1:
     st.markdown(f"""
-    **📍 Location:** {selected_district} District, Malawi  
-    **🌽 Crop:** Maize  
-    **🤖 Model:** ARIMAX + SVR Hybrid  
-    **📊 Base Yield:** {model.base_yield:.0f} kg/ha  
+    ** Location:** {selected_district} District, Malawi  
+    ** Crop:** Maize  
+    ** Model:** ARIMAX + SVR Hybrid  
+    ** Base Yield:** {model.base_yield:.0f} kg/ha  
     """)
 
 with col2:
     st.markdown(f"""
-    **🌦️ Climate Source:** NASA POWER API + Historical  
-    **🎯 RMSE:** {perf['rmse'] or 'N/A'} kg/ha  
-    **📈 MAPE:** {perf['mape'] or 'N/A'}%  
-    **📊 R²:** 0.605  
+    **Climate Source:** NASA POWER API + Historical  
+    **RMSE:** {perf['rmse'] or 'N/A'} kg/ha  
+    **MAPE:** {perf['mape'] or 'N/A'}%  
+    **R²:** 0.605  
     """)
 
 st.markdown("---")
