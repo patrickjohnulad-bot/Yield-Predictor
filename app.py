@@ -348,7 +348,7 @@ all_districts = sorted(list(models['Maize'].keys()))
 # INPUT SECTION
 # ============================================================================
 
-st.markdown("## Select Crop and Location")
+st.markdown("#### Select Crop and Location")
 
 col1, col2 = st.columns(2)
 
@@ -360,7 +360,7 @@ with col1:
 with col2:
     selected_district = st.selectbox("District:", all_districts)
 
-st.markdown("## Select Year")
+st.markdown("#### Select Year")
 year = st.number_input("Year:", min_value=2000, max_value=2030, value=2025, step=1)
 
 # Get model
@@ -478,11 +478,10 @@ with col1:
 
 with col2:
     st.markdown(f"""
-    **🌦️ Climate Source:** NASA POWER API + Historical  
-    **🎯 R²:** {r2_values[selected_crop]:.4f}  
-    **📊 RMSE:** {rmse_values[selected_crop]} kg/ha  
-    **📈 ARIMA Order:** (1, 0, 0)  
-    **🔬 SVR Kernel:** rbf
+    Climate Source: NASA POWER API + Historical  
+    RMSE: {rmse_values[selected_crop]} kg/ha  
+    ARIMA Order: (1, 0, 0)  
+    SVR Kernel: rbf
     """)
 
 st.markdown("---")
