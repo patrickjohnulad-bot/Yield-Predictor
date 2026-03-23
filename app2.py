@@ -244,7 +244,6 @@ with st.spinner("Loading models..."):
         df_full = load_harveststat_data()
         actual_dict = load_actual_yields()
         historical_climate = load_historical_climate()
-        st.success(" Welcome to Malawi Maize Yield Predictor!")
     except Exception as e:
         st.error(f"Error loading models: {str(e)}")
         st.stop()
@@ -337,7 +336,7 @@ if st.button(" Predict Yield", type="primary", use_container_width=True):
         error_percent = (error / actual) * 100
         
         st.markdown("---")
-        st.markdown("### Actual vs Predicted")
+        st.markdown("Actual vs Predicted")
         
         col1, col2 = st.columns(2)
         with col1:
