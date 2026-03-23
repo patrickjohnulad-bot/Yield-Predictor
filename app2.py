@@ -359,10 +359,10 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.markdown(f"""
-    ** Location:** {selected_district} District, Malawi  
-    ** Crop:** Maize  
-    ** Model:** ARIMAX + SVR Hybrid  
-    ** Base Yield:** {model.base_yield:.0f} kg/ha  
+    Location: {selected_district} District, Malawi  
+    Crop: Maize  
+    Model: ARIMAX + SVR Hybrid  
+    Base Yield: {model.base_yield:.0f} kg/ha  
     """)
 
 with col2:
