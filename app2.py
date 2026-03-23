@@ -13,7 +13,7 @@ warnings.filterwarnings('ignore')
 # ============================================================================
 
 st.set_page_config(page_title="Malawi Maize Yield Predictor", page_icon="🌽", layout="centered")
-st.success("Welcome to Malawi Maize Yield Predictor!")
+st.success("Welcome to Maize Yield Predictor!")
 
 
 # ============================================================================
