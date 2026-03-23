@@ -4,8 +4,15 @@ import numpy as np
 import pickle
 import requests
 import datetime
+import os
 import warnings
 warnings.filterwarnings('ignore')
+
+# ============================================================================
+# GET CURRENT DIRECTORY FOR FILE PATHS
+# ============================================================================
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
 
 # ============================================================================
 # DEFINE THE CORRECTED MODEL CLASS
@@ -66,7 +73,6 @@ class CorrectedDistrictModel:
             'trend': self.trend
         }
 
-
 # ============================================================================
 # LOAD CORRECTED MODEL
 # ============================================================================
@@ -74,7 +80,8 @@ class CorrectedDistrictModel:
 @st.cache_resource
 def load_model():
     """Load corrected district models (R² = 0.605)"""
-    with open('/home/guest/Documents/MyThesis/climate/corrected_district_models.pkl', 'rb') as f:
+    model_path = os.path.join(current_dir, 'corrected_district_models.pkl')
+    with open(model_path, 'rb') as f:
         models = pickle.load(f)
     return models
 
@@ -85,7 +92,8 @@ def load_model():
 @st.cache_data
 def load_actual_yields():
     """Load actual yield data from HarvestStat Africa"""
-    df = pd.read_csv('/home/guest/Documents/MyThesis/climate/hvstat_africa_data_v1.0.csv')
+    data_path = os.path.join(current_dir, 'hvstat_africa_data_v1.0.csv')
+    df = pd.read_csv(data_path)
     
     malawi_maize = df[(df['country'] == 'Malawi') & (df['product'] == 'Maize')].copy()
     malawi_maize['yield'] = malawi_maize['production'] / malawi_maize['area']
@@ -109,9 +117,9 @@ def load_actual_yields():
 @st.cache_data
 def load_harveststat_data():
     """Load HarvestStat Africa data for district list"""
-    df = pd.read_csv('/home/guest/Documents/MyThesis/climate/hvstat_africa_data_v1.0.csv')
+    data_path = os.path.join(current_dir, 'hvstat_africa_data_v1.0.csv')
+    df = pd.read_csv(data_path)
     return df
-
 
 # ============================================================================
 # COORDINATES FOR MALAWI DISTRICTS
@@ -137,7 +145,8 @@ district_coords = {
 @st.cache_data
 def load_historical_climate():
     try:
-        df = pd.read_csv('/home/guest/Documents/MyThesis/climate/malawi_all_28_districts_climate.csv')
+        data_path = os.path.join(current_dir, 'malawi_all_28_districts_climate.csv')
+        df = pd.read_csv(data_path)
         return df
     except:
         return None
@@ -196,7 +205,7 @@ def get_climate_data(district, year, historical_df):
     if year >= current_year - 1:
         nasa_data = get_nasa_power_climate(lat, lon, year)
         if nasa_data:
-            return nasa_data, " Using live climate data from NASA POWER"
+            return nasa_data, "✅ Using live climate data from NASA POWER"
     
     if historical_df is not None:
         historical = historical_df[(historical_df['district'] == district) & (historical_df['YEAR'] == year)]
@@ -211,7 +220,6 @@ def get_climate_data(district, year, historical_df):
             }, "📂 Using stored historical climate data"
     
     return None, "⚠️ No climate data available. Please enter manually."
-
 
 # ============================================================================
 # STREAMLIT APP
@@ -237,7 +245,7 @@ all_districts = sorted(models.keys())
 # INPUT SECTION
 # ============================================================================
 
-st.markdown("###  Select Location and Year")
+st.markdown("### 📍 Select Location and Year")
 
 col1, col2 = st.columns(2)
 
@@ -251,11 +259,11 @@ with col2:
 model = models[selected_district]
 perf = model.get_performance()
 
-st.caption(f" {'Trained' if perf['rmse'] else 'Base'} Model | Base yield: {model.base_yield:.0f} kg/ha | RMSE: {perf['rmse'] or 'N/A'} kg/ha | MAPE: {perf['mape'] or 'N/A'}%")
+st.caption(f"📍 {'Trained' if perf['rmse'] else 'Base'} Model | Base yield: {model.base_yield:.0f} kg/ha | RMSE: {perf['rmse'] or 'N/A'} kg/ha | MAPE: {perf['mape'] or 'N/A'}%")
 
 # Auto-fetch climate data
 st.markdown("---")
-st.markdown("###  Climate Data")
+st.markdown("### 🌦️ Climate Data")
 
 with st.spinner(f"Fetching climate data for {selected_district}, {year}..."):
     climate_data, message = get_climate_data(selected_district, year, historical_climate)
@@ -272,13 +280,13 @@ if climate_data:
         tmax = st.number_input("Temperature (°C):", value=float(climate_data['tmax']), step=0.5)
         wind = st.number_input("Wind Speed (m/s):", value=float(climate_data['wind']), step=0.1)
     
-    use_manual = st.checkbox("Edit climate values manually")
+    use_manual = st.checkbox("✏️ Edit climate values manually")
     if use_manual:
         st.info("Edit values above to test different climate scenarios")
 
 else:
     st.warning(message)
-    st.markdown("### Manual Climate Input")
+    st.markdown("### ✏️ Manual Climate Input")
     
     col1, col2 = st.columns(2)
     with col1:
@@ -292,13 +300,13 @@ else:
 # PREDICT BUTTON
 # ============================================================================
 
-if st.button("Predict Yield", type="primary", use_container_width=True):
+if st.button("🔮 Predict Yield", type="primary", use_container_width=True):
     
     climate = {'rainfall': rainfall, 'tmax': tmax, 'humidity': humidity, 'wind': wind}
     prediction = models[selected_district].predict(climate, year)
     
     st.markdown("---")
-    st.markdown("### Prediction Result")
+    st.markdown("### 📊 Prediction Result")
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
@@ -318,42 +326,42 @@ if st.button("Predict Yield", type="primary", use_container_width=True):
         error_percent = (error / actual) * 100
         
         st.markdown("---")
-        st.markdown("###  Actual vs Predicted")
+        st.markdown("### 📈 Actual vs Predicted")
         
         col1, col2 = st.columns(2)
         with col1:
-            st.metric(" Actual Yield", f"{actual:.0f} kg/ha")
+            st.metric("📊 Actual Yield", f"{actual:.0f} kg/ha")
         with col2:
-            st.metric(" Predicted Yield", f"{prediction} kg/ha", delta=f"{prediction - actual:.0f}")
+            st.metric("🔮 Predicted Yield", f"{prediction} kg/ha", delta=f"{prediction - actual:.0f}")
         
-        st.info(f"Prediction error: {error:.0f} kg/ha ({error_percent:.1f}%)")
+        st.info(f"📊 Prediction error: {error:.0f} kg/ha ({error_percent:.1f}%)")
     
     else:
-        st.info(f" No actual yield data available for {selected_district} in {year}")
+        st.info(f"📌 No actual yield data available for {selected_district} in {year}")
 
 # ============================================================================
 # ABOUT SECTION
 # ============================================================================
 
 st.markdown("---")
-st.markdown("###  About This Tool")
+st.markdown("### 📝 About This Tool")
 
 col1, col2 = st.columns(2)
 
 with col1:
     st.markdown(f"""
-    ** Location:** {selected_district} District, Malawi  
-    **Crop:** Maize  
+    **📍 Location:** {selected_district} District, Malawi  
+    **🌽 Crop:** Maize  
     **🤖 Model:** ARIMAX + SVR Hybrid  
-    ** Base Yield:** {model.base_yield:.0f} kg/ha  
+    **📊 Base Yield:** {model.base_yield:.0f} kg/ha  
     """)
 
 with col2:
     st.markdown(f"""
-    **Climate Source:** NASA POWER API + Historical  
-    **RMSE:** {perf['rmse'] or 'N/A'} kg/ha  
-    **MAPE:** {perf['mape'] or 'N/A'}%  
-    **R²:** 0.605  
+    **🌦️ Climate Source:** NASA POWER API + Historical  
+    **🎯 RMSE:** {perf['rmse'] or 'N/A'} kg/ha  
+    **📈 MAPE:** {perf['mape'] or 'N/A'}%  
+    **📊 R²:** 0.605  
     """)
 
 st.markdown("---")
