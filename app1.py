@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -7,8 +8,11 @@ import datetime
 import warnings
 warnings.filterwarnings('ignore')
 
+# Get the directory where this file is located
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 # ============================================================================
-# DEFINE THE ARIMAX-SVR MODEL (Matches project1.ipynb)
+# DEFINE THE ARIMAX-SVR MODEL
 # ============================================================================
 
 class ARIMAXSVRModel:
@@ -18,43 +22,34 @@ class ARIMAXSVRModel:
         self.base_yield = base_yield
         self.rmse = rmse
         self.mape = mape
-        self.trend = 8  # kg/ha per year from 2015
+        self.trend = 8
     
     def predict(self, climate_data, year):
-        """Predict yield using optimized ARIMAX-SVR logic"""
         prediction = self.base_yield
-
-        # Technology trend from 2015
         trend_years = max(0, year - 2015)
         prediction += self.trend * trend_years
-
-        # Climate effects (optimized from winning model)
+        
         rainfall = climate_data.get('rainfall', 3.5)
         tmax = climate_data.get('tmax', 25.0)
         humidity = climate_data.get('humidity', 70.0)
         wind = climate_data.get('wind', 2.5)
-
-        # ARIMAX component: rainfall effect
+        
         if rainfall < 2.0:
             prediction -= 150
         elif rainfall > 5.0:
             prediction -= 100
-
-        # ARIMAX component: temperature effect
+        
         if tmax > 28:
             prediction -= 100
         elif tmax < 22:
             prediction -= 80
-
-        # SVR component: humidity correction
+        
         if humidity < 55:
             prediction -= 80
-
-        # SVR component: wind correction
+        
         if wind > 3.5:
             prediction -= 80
-
-        # Crop-specific bounds
+        
         if self.crop_name == 'Rice':
             return max(400, min(3500, round(prediction)))
         elif self.crop_name == 'Soybean':
@@ -76,13 +71,13 @@ class ARIMAXSVRModel:
 
 
 # ============================================================================
-# LOAD ARIMAX-SVR MODELS (All crops)
+# LOAD MODELS (Using relative paths)
 # ============================================================================
 
 @st.cache_resource
 def load_models():
-    """Load ARIMAX-SVR models for all crops"""
-    with open('/home/guest/Documents/MyThesis/climate/arimax_svr_all_crops.pkl', 'rb') as f:
+    model_path = os.path.join(BASE_DIR, 'arimax_svr_all_crops.pkl')
+    with open(model_path, 'rb') as f:
         models = pickle.load(f)
     return models
 
@@ -92,8 +87,8 @@ def load_models():
 
 @st.cache_data
 def load_actual_yields():
-    """Load actual yield data from HarvestStat Africa for all crops"""
-    df = pd.read_csv('/home/guest/Documents/MyThesis/climate/hvstat_africa_data_v1.0.csv')
+    data_path = os.path.join(BASE_DIR, 'hvstat_africa_data_v1.0.csv')
+    df = pd.read_csv(data_path)
     
     actual_dict = {}
     crops = ['Maize', 'Rice', 'Soybean', 'Groundnuts (In Shell)']
@@ -102,8 +97,6 @@ def load_actual_yields():
         crop_display = crop.replace(' (In Shell)', '')
         crop_data = df[(df['country'] == 'Malawi') & (df['product'] == crop)].copy()
         crop_data['yield_kg'] = (crop_data['production'] / crop_data['area']) * 1000
-        
-        # Fix Thyolo 2023 outlier
         crop_data.loc[(crop_data['admin_2'] == 'Thyolo') & (crop_data['harvest_year'] == 2023), 'yield_kg'] = 5570
         
         actual_dict[crop_display] = {}
@@ -131,7 +124,7 @@ crop_info = {
 }
 
 # ============================================================================
-# COORDINATES FOR MALAWI DISTRICTS
+# COORDINATES
 # ============================================================================
 
 district_coords = {
@@ -154,7 +147,8 @@ district_coords = {
 @st.cache_data
 def load_historical_climate():
     try:
-        df = pd.read_csv('/home/guest/Documents/MyThesis/climate/malawi_all_28_districts_climate.csv')
+        climate_path = os.path.join(BASE_DIR, 'malawi_all_28_districts_climate.csv')
+        df = pd.read_csv(climate_path)
         return df
     except:
         return None
