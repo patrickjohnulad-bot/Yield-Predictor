@@ -15,6 +15,7 @@ warnings.filterwarnings('ignore')
 st.set_page_config(page_title="Malawi Crop Yield Predictor", page_icon="🌾", layout="centered")
 st.success("🌾 Welcome to Malawi Crop Yield Predictor!")
 
+
 # ============================================================================
 # GET CURRENT DIRECTORY FOR FILE PATHS
 # ============================================================================
@@ -326,6 +327,9 @@ def get_climate_data(district, year, historical_df):
 # STREAMLIT APP
 # ============================================================================
 
+st.image(os.path.join(BASE_DIR, 'app.png'), 
+         caption='Malawi Crop Yield Predictor Dashboard', 
+         use_container_width=True)
 st.title("🌾 Malawi Crop Yield Predictor")
 st.markdown("### AI-Powered Forecasting with ARIMAX-SVR Hybrid Model")
 st.markdown("---")
