@@ -9,6 +9,12 @@ import warnings
 warnings.filterwarnings('ignore')
 
 # ============================================================================
+# IMPORTANT: st.set_page_config MUST be the first Streamlit command
+# ============================================================================
+
+st.set_page_config(page_title="Malawi Maize Yield Predictor", page_icon="🌽", layout="centered")
+
+# ============================================================================
 # GET CURRENT DIRECTORY FOR FILE PATHS
 # ============================================================================
 
@@ -225,18 +231,21 @@ def get_climate_data(district, year, historical_df):
 # STREAMLIT APP
 # ============================================================================
 
-st.set_page_config(page_title="Malawi Maize Yield Predictor", page_icon="🌽", layout="centered")
-
 st.title("🌽 Malawi Maize Yield Predictor")
 st.markdown("### AI-Powered Crop Yield Forecasting")
 st.markdown("---")
 
 # Load model and data
 with st.spinner("Loading models..."):
-    models = load_model()
-    df_full = load_harveststat_data()
-    actual_dict = load_actual_yields()
-    historical_climate = load_historical_climate()
+    try:
+        models = load_model()
+        df_full = load_harveststat_data()
+        actual_dict = load_actual_yields()
+        historical_climate = load_historical_climate()
+        st.success("✅ Models loaded successfully!")
+    except Exception as e:
+        st.error(f"Error loading models: {str(e)}")
+        st.stop()
 
 # Get all Malawi districts
 all_districts = sorted(models.keys())
