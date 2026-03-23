@@ -367,10 +367,10 @@ with col1:
 
 with col2:
     st.markdown(f"""
-    **Climate Source:** NASA POWER API + Historical  
-    **RMSE:** {perf['rmse'] or 'N/A'} kg/ha  
-    **MAPE:** {perf['mape'] or 'N/A'}%  
-    **R²:** 0.605  
+    Climate Source: NASA POWER API + Historical  
+    RMSE: {perf['rmse'] or 'N/A'} kg/ha  
+    MAPE: {perf['mape'] or 'N/A'}%  
+    R²: 60.5%  
     """)
 
 st.markdown("---")
