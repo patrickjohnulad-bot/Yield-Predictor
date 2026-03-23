@@ -13,10 +13,6 @@ warnings.filterwarnings('ignore')
 # ============================================================================
 
 st.set_page_config(page_title="Malawi Crop Yield Predictor", page_icon="🌾", layout="centered")
-
-current_dir = os.path.dirname(os.path.abspath(__file__))
-st.image(os.path.join(current_dir, 'app.png'), use_container_width=True)
-st.divider()
 st.success("🌾 Welcome to Malawi Crop Yield Predictor!")
 
 
