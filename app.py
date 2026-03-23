@@ -429,7 +429,6 @@ if st.button(f"Predict {info['icon']} {selected_crop} Yield", type="primary", us
             <h2 style="margin: 10px 0 0 0;">{prediction}</h2>
             <h3>kg/ha</h3>
             <p>Predicted {selected_crop} Yield for {selected_district} in {year}</p>
-            <p style="font-size: 12px;">R² = {r2_values[selected_crop]:.4f} | RMSE = {rmse_values[selected_crop]} kg/ha</p>
         </div>
         """, unsafe_allow_html=True)
     
@@ -457,24 +456,24 @@ if st.button(f"Predict {info['icon']} {selected_crop} Yield", type="primary", us
             st.error(f"❌ High prediction error: {error:.0f} kg/ha ({error_percent:.1f}%)")
     
     else:
-        st.info(f"📌 No actual yield data available for {selected_crop} in {selected_district} ({year})")
+        st.info(f"No actual yield data available for {selected_crop} in {selected_district} ({year})")
 
 # ============================================================================
 # ABOUT SECTION
 # ============================================================================
 
 st.markdown("---")
-st.markdown("### 📝 About This Tool")
+st.markdown("About This Tool")
 
 col1, col2 = st.columns(2)
 
 with col1:
     st.markdown(f"""
-    **📍 Location:** {selected_district} District, Malawi  
-    **🌾 Crop:** {info['icon']} {selected_crop}  
-    **🤖 Model:** ARIMAX-SVR Hybrid  
-    **📊 Base Yield:** {perf['base_yield']:.0f} kg/ha  
-    **📈 Technology Trend:** +{perf['trend']} kg/ha/year
+    Location:{selected_district} District, Malawi  
+    Crop:{info['icon']} {selected_crop}  
+    Model: ARIMAX-SVR Hybrid  
+    Base Yield: {perf['base_yield']:.0f} kg/ha  
+    Technology Trend: +{perf['trend']} kg/ha/year
     """)
 
 with col2:
