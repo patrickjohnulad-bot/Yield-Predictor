@@ -13,20 +13,6 @@ warnings.filterwarnings('ignore')
 # ============================================================================
 
 st.set_page_config(page_title="Malawi Crop Yield Predictor", page_icon="🌾", layout="centered")
-st.markdown(
-    f"""
-    <meta property="og:image" content="https://raw.githubusercontent.com/patrickjohnludbot/Yield-Predictor/main/app.png">
-    <meta property="og:title" content="Malawi Crop Yield Predictor">
-    <meta property="og:description" content="AI-powered crop yield prediction using ARIMAX-SVR">
-    <meta name="twitter:card" content="summary_large_image">
-    """,
-    unsafe_allow_html=True
-)
-
-# Display the image at the top
-current_dir = os.path.dirname(os.path.abspath(__file__))
-st.image(os.path.join(current_dir, 'app.png'), use_container_width=True)
-st.divider()
 st.success("🌾 Welcome to Malawi Crop Yield Predictor!")
 
 
